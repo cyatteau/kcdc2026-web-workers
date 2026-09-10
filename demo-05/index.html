@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seattle Parks Priority Explorer</title>
+    <link rel="icon" href="data:," />
+
+    <script src="./config.js"></script>
+    <script>
+      const DEMO_API_KEY = String(window.ARCGIS_API_KEY || '').trim()
+
+      var esriConfig = {
+        apiKey:
+          DEMO_API_KEY && DEMO_API_KEY !== 'PASTE_YOUR_API_KEY_HERE'
+            ? DEMO_API_KEY
+            : undefined,
+        apiKeys: {
+          basemapStyles:
+            DEMO_API_KEY && DEMO_API_KEY !== 'PASTE_YOUR_API_KEY_HERE'
+              ? DEMO_API_KEY
+              : undefined
+        },
+        request: { useIdentity: false },
+        sessions: {
+          basemap: {
+            enabled: false
+          }
+        }
+      }
+    </script>
+
+    <!-- ArcGIS Maps SDK for JavaScript 5.0 CDN entry point -->
+    <script type="module" src="https://js.arcgis.com/5.0/"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <header class="sidebar-header">
+          <p class="eyebrow">Seattle Parks Priority Explorer</p>
+          <h1>Prioritize Seattle parks without freezing the map</h1>
+          <p class="lede">
+            Explore visible Seattle park boundaries, compare analysis modes, and
+            keep map interaction responsive.
+          </p>
+        </header>
+
+        <section class="api-warning" id="apiWarning" hidden>
+          Paste your API key in <code>config.js</code>. The key needs Location
+          services &gt; Basemaps privileges.
+        </section>
+
+        <nav class="tabs" aria-label="Analysis sections">
+          <button class="tab-btn active" type="button" data-tab="run">
+            Run
+          </button>
+          <button class="tab-btn" type="button" data-tab="results">
+            Results
+          </button>
+          <button class="tab-btn" type="button" data-tab="messages">
+            Messages
+          </button>
+        </nav>
+
+        <section id="tab-run" class="tab-panel active">
+          <section class="card status-card">
+            <div class="status-heading">
+              <span class="badge">Analysis status</span>
+              <span id="mode" class="mode-pill">—</span>
+            </div>
+            <div id="status" class="status">Loading ArcGIS map…</div>
+          </section>
+
+          <section class="card cues-card">
+            <div class="section-title">Responsiveness check</div>
+            <div class="cue-grid">
+              <div class="heartbeat" aria-hidden="true"></div>
+              <div>
+                <strong>UI heartbeat</strong>
+                <p>If this pauses, the page is waiting on heavy work.</p>
+              </div>
+            </div>
+
+            <div class="monitor-cardlet">
+              <div class="monitor-topline">
+                <span>Responsiveness monitor</span>
+                <strong id="uiClock">0.0s</strong>
+              </div>
+              <div class="monitor-track">
+                <div id="uiMeter" class="monitor-meter"></div>
+              </div>
+              <p id="uiDelay" class="monitor-delay">Updating every 100 ms</p>
+            </div>
+
+            <div class="counter-row">
+              <button id="counterBtn" class="btn secondary" type="button">
+                Test click
+              </button>
+              <strong id="counter">0</strong>
+              <span id="clickLag">No click lag yet</span>
+            </div>
+          </section>
+
+          <section class="card controls-card">
+            <div class="section-title">Analysis setup</div>
+            <div class="control-grid">
+              <label
+                >Analysis intensity:
+                <strong><span id="passesValue">5</span>s</strong>
+                <input
+                  id="passes"
+                  type="range"
+                  min="3"
+                  max="9"
+                  value="5"
+                  step="1"
+                />
+              </label>
+              <label
+                >Priority threshold:
+                <strong><span id="thresholdValue">72</span></strong>
+                <input
+                  id="threshold"
+                  type="range"
+                  min="50"
+                  max="95"
+                  value="72"
+                  step="1"
+                />
+              </label>
+              <label
+                >Complexity emphasis:
+                <strong><span id="complexityValue">1.4</span>x</strong>
+                <input
+                  id="complexity"
+                  type="range"
+                  min="0.5"
+                  max="3"
+                  value="1.4"
+                  step="0.1"
+                />
+              </label>
+              <label
+                >Debounce delay:
+                <strong><span id="debounceValue">350</span> ms</strong>
+                <input
+                  id="debounce"
+                  type="range"
+                  min="0"
+                  max="900"
+                  value="350"
+                  step="50"
+                />
+              </label>
+            </div>
+
+            <label class="check-row">
+              <input id="autoRun" type="checkbox" checked />
+              <span>Auto-run worker analysis when scenario inputs change</span>
+            </label>
+
+            <div class="button-grid primary-actions">
+              <button id="queryBtn" class="btn primary" type="button" disabled>
+                Load visible parks
+              </button>
+              <button id="mainBtn" class="btn danger" type="button" disabled>
+                Run on main thread
+              </button>
+              <button id="workerBtn" class="btn safe" type="button" disabled>
+                Run in worker
+              </button>
+              <button
+                id="cancelBtn"
+                class="btn outline danger-outline"
+                type="button"
+                disabled
+              >
+                Cancel analysis
+              </button>
+            </div>
+
+            <div class="button-grid compact-actions">
+              <button id="rapidBtn" class="btn outline" type="button" disabled>
+                Simulate scenario changes
+              </button>
+              <button id="resetViewBtn" class="btn outline" type="button">
+                Reset map view
+              </button>
+              <button id="clearBtn" class="btn outline" type="button">
+                Clear results
+              </button>
+            </div>
+
+            <div class="progress-shell" aria-label="Worker progress">
+              <div id="progress" class="progress-bar"></div>
+            </div>
+          </section>
+        </section>
+
+        <section id="tab-results" class="tab-panel">
+          <section class="card results-card">
+            <div class="stats">
+              <div class="stat">
+                <span>Features queried</span
+                ><strong id="featureCount">0</strong>
+              </div>
+              <div class="stat">
+                <span>High-priority parks</span
+                ><strong id="priorityCount">0</strong>
+              </div>
+              <div class="stat">
+                <span>Elapsed</span><strong id="elapsed">0 ms</strong>
+              </div>
+              <div class="stat">
+                <span>Messages sent</span><strong id="sent">0</strong>
+              </div>
+              <div class="stat wide">
+                <span>Ignored stale</span><strong id="stale">0</strong>
+              </div>
+            </div>
+            <div id="results" class="results empty">
+              Query the visible Seattle park boundaries first.
+            </div>
+          </section>
+        </section>
+
+        <section id="tab-messages" class="tab-panel">
+          <section class="card messages-card">
+            <div class="message-toolbar">
+              <span class="badge">Worker messages</span>
+              <button id="clearLogBtn" class="btn outline small" type="button">
+                Clear log
+              </button>
+            </div>
+            <div class="protocol-cheatsheet">
+              <span>type</span><span>requestId</span><span>payload</span
+              ><span>PROGRESS</span><span>DONE</span><span>CANCELLED</span>
+            </div>
+            <div id="log" class="log"></div>
+          </section>
+        </section>
+      </aside>
+
+      <main class="map-wrap">
+        <arcgis-map
+          id="map"
+          basemap="arcgis/dark-gray"
+          center="-122.3321,47.6062"
+          zoom="12"
+        >
+          <arcgis-zoom slot="top-left"></arcgis-zoom>
+          <arcgis-legend slot="bottom-left"></arcgis-legend>
+        </arcgis-map>
+        <div class="live-overlay">
+          <div class="live-overlay-dot" aria-hidden="true"></div>
+          <div>
+            <strong>Responsiveness monitor</strong>
+            <span id="mapUiStatus">UI updates should keep moving</span>
+          </div>
+        </div>
+        <div class="map-note">
+          Explore visible Seattle park boundaries, compare analysis modes, and
+          keep map interaction responsive.
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
