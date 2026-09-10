@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo 1 - Main Thread Diagnostics</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Demo 1 · Trigger + Hunt</p>
+        <h1>Main thread diagnostics</h1>
+        <p>Instead of only saying “the UI froze,” this version measures frame gaps, click delay, long tasks, and input lag while a CPU-heavy job runs.</p>
+      </div>
+      <div class="panel">
+        <div class="heartbeat-card">
+          <div class="heartbeat" aria-hidden="true"></div>
+          <div>
+            <strong>UI heartbeat</strong>
+            <p>If this spinner pauses, the main thread is not getting time to paint frames.</p>
+          </div>
+        </div>
+        <div class="counter-row">
+          <button id="counterBtn" class="secondary">Click counter</button>
+          <strong id="counter" class="big-number">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Run an expensive synchronous task</h2>
+        <div class="controls">
+          <label>Dataset size: <strong><span id="sizeValue">85000</span> records</strong>
+            <input id="size" type="range" min="20000" max="150000" value="85000" step="5000" />
+          </label>
+          <label>CPU spice: <strong><span id="spiceValue">6</span></strong>
+            <input id="spice" type="range" min="1" max="12" value="6" step="1" />
+          </label>
+          <label>Try typing here while work runs
+            <input id="typingBox" type="text" placeholder="Type during the heavy task…" />
+          </label>
+          <div class="button-row">
+            <button id="runBtn" class="danger">Run blocking analysis</button>
+            <button id="resetBtn" class="ghost">Reset metrics</button>
+          </div>
+        </div>
+        <div id="status" class="status">Ready. Click the counter, type a little, then run blocking analysis.</div>
+      </div>
+
+      <div class="panel">
+        <h2>What the browser feels</h2>
+        <div class="stat-grid">
+          <div class="stat"><span>Largest frame gap</span><strong id="frameGap">0 ms</strong></div>
+          <div class="stat"><span>Long tasks observed</span><strong id="longTasks">0</strong></div>
+          <div class="stat"><span>Last click delay</span><strong id="clickDelay">0 ms</strong></div>
+          <div class="stat"><span>Analysis time</span><strong id="elapsed">0 ms</strong></div>
+        </div>
+        <div class="kpis">
+          <span class="chip">Clicks queue up</span>
+          <span class="chip">Frames get skipped</span>
+          <span class="chip">Typing waits</span>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
