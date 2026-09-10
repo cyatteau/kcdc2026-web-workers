@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo 3 - Protocol Progress Cancel</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Demo 3 · Establish + Add guardrails</p>
+          <h1>Protocol, progress, cancel</h1>
+          <p>
+            This demo makes the worker feel like a real part of an app: every
+            job has a request ID, progress updates, stale-message protection,
+            and cancellation.
+          </p>
+        </div>
+        <div class="panel">
+          <span class="badge">Message protocol</span>
+          <pre class="code">{ type, requestId, payload }</pre>
+        </div>
+      </section>
+      <section class="grid">
+        <div class="panel">
+          <h2>Long-running analysis job</h2>
+          <div class="controls">
+            <label
+              >Records: <strong><span id="recordsValue">140000</span></strong
+              ><input
+                id="records"
+                type="range"
+                min="50000"
+                max="250000"
+                value="140000"
+                step="10000"
+            /></label>
+            <label
+              >Chunk size: <strong><span id="chunkValue">750</span></strong
+              ><input
+                id="chunk"
+                type="range"
+                min="250"
+                max="2500"
+                value="750"
+                step="250"
+            /></label>
+            <div class="button-row">
+              <button id="startBtn" class="primary">Start job</button
+              ><button id="startNewBtn" class="secondary">
+                Start newer job</button
+              ><button id="cancelBtn" class="danger">Cancel current job</button>
+            </div>
+          </div>
+          <div class="progress-shell">
+            <div id="progress" class="progress-bar"></div>
+          </div>
+          <div id="status" class="status">
+            Ready. Start a job, then cancel or start a newer one.
+          </div>
+          <div class="stat-grid">
+            <div class="stat">
+              <span>Active request</span><strong id="activeId">—</strong>
+            </div>
+            <div class="stat">
+              <span>Progress</span><strong id="progressText">0%</strong>
+            </div>
+            <div class="stat">
+              <span>Elapsed</span><strong id="elapsed">—</strong>
+            </div>
+            <div class="stat">
+              <span>Ignored stale</span><strong id="stale">0</strong>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Message log</h2>
+          <div class="log" id="log"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
