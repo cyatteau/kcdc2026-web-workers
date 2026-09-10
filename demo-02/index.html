@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo 2 - Worker Responsiveness Lab</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Demo 2 · Relocate</p>
+          <h1>Same work. Different thread.</h1>
+          <p>
+            Run the same analysis on the main thread and in a Web Worker, then
+            compare responsiveness while the job is running.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="heartbeat-card">
+            <div class="heartbeat" aria-hidden="true"></div>
+            <div>
+              <strong>UI heartbeat</strong>
+              <p>
+                The heartbeat should keep moving when the worker owns the heavy
+                work.
+              </p>
+            </div>
+          </div>
+          <div class="counter-row">
+            <button id="counterBtn" class="secondary">Click counter</button
+            ><strong id="counter" class="big-number">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <h2>Run the comparison</h2>
+          <div class="controls">
+            <label
+              >Dataset size:
+              <strong><span id="sizeValue">100000</span> records</strong
+              ><input
+                id="size"
+                type="range"
+                min="25000"
+                max="180000"
+                value="100000"
+                step="5000"
+            /></label>
+            <label
+              >CPU spice: <strong><span id="spiceValue">6</span></strong
+              ><input
+                id="spice"
+                type="range"
+                min="1"
+                max="12"
+                value="6"
+                step="1"
+            /></label>
+            <div class="button-row">
+              <button id="mainBtn" class="danger">Run on main thread</button>
+              <button id="workerBtn" class="primary">Run in worker</button>
+            </div>
+          </div>
+          <div id="status" class="status">
+            Ready. Run main-thread first, then worker.
+          </div>
+          <div class="stat-grid">
+            <div class="stat">
+              <span>Main elapsed</span><strong id="mainElapsed">—</strong>
+            </div>
+            <div class="stat">
+              <span>Worker elapsed</span><strong id="workerElapsed">—</strong>
+            </div>
+            <div class="stat">
+              <span>Max frame gap</span><strong id="frameGap">0 ms</strong>
+            </div>
+            <div class="stat">
+              <span>Result matches</span><strong id="matches">0</strong>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Message contract</h2>
+          <pre class="code">
+main → worker
+{ type: "ANALYZE", requestId, payload }
+
+worker → main
+{ type: "DONE", requestId, payload }</pre
+          >
+          <div class="log" id="log"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
