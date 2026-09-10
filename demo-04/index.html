@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo 4 - Debounced Worker Filter</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Demo 4 · Add guardrails</p>
+          <h1>Debounced filter worker</h1>
+          <p>
+            This is the “user keeps changing their mind” demo: search, filter,
+            debounce, aggregate results, ignore stale responses, and keep the UI
+            responsive.
+          </p>
+        </div>
+        <div class="panel">
+          <span class="badge">Real-app behavior</span>
+          <p>
+            Don’t spam the worker. Don’t finish work nobody wants. Keep the UI
+            honest.
+          </p>
+        </div>
+      </section>
+      <section class="grid">
+        <div class="panel">
+          <h2>Search a generated dataset</h2>
+          <div class="controls">
+            <label
+              >Search query <input id="query" type="text" value="coffee"
+            /></label>
+            <label
+              >Category
+              <select id="category">
+                <option value="all">All categories</option>
+                <option>coffee</option>
+                <option>beer</option>
+                <option>food</option>
+                <option>parks</option>
+                <option>culture</option>
+              </select></label
+            >
+            <label
+              >Debounce delay:
+              <strong><span id="delayValue">350</span> ms</strong
+              ><input
+                id="delay"
+                type="range"
+                min="0"
+                max="900"
+                value="350"
+                step="50"
+            /></label>
+            <label class="check"
+              ><input id="auto" type="checkbox" checked /> Auto-run on
+              changes</label
+            >
+            <div class="button-row">
+              <button id="runBtn" class="primary">Run filter</button
+              ><button id="typeBtn" class="secondary">
+                Simulate fast typing</button
+              ><button id="clearBtn" class="ghost">Clear log</button>
+            </div>
+          </div>
+          <div class="progress-shell">
+            <div id="progress" class="progress-bar"></div>
+          </div>
+          <div id="status" class="status">
+            Ready. Type quickly and watch debounce control the worker traffic.
+          </div>
+          <div class="stat-grid">
+            <div class="stat">
+              <span>Messages sent</span><strong id="sent">0</strong>
+            </div>
+            <div class="stat">
+              <span>Ignored stale</span><strong id="stale">0</strong>
+            </div>
+            <div class="stat">
+              <span>Matches</span><strong id="matches">0</strong>
+            </div>
+            <div class="stat">
+              <span>Elapsed</span><strong id="elapsed">—</strong>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Top results + worker traffic</h2>
+          <div class="results" id="results"></div>
+          <h3 style="margin-top: 14px">Message log</h3>
+          <div class="log" id="log"></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
